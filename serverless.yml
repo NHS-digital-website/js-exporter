@@ -1,0 +1,43 @@
+service: js-export-lambda
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  timeout: 10
+  region: eu-west-2
+  endpointType: REGIONAL
+  iam:
+    role:
+      managedPolicies:
+        - "arn:aws:iam::186991146235:policy/AccessDataVizParameter"
+  apiGateway:
+    binaryMediaTypes:
+      - '*/*'
+  vpc:
+    securityGroupIds:
+      - sg-0d68c15f546c3cbac
+    subnetIds:
+      - subnet-08908e0b905529eac
+
+functions:
+  index:
+    handler: lambda.handler
+    events:
+      - http:
+          path: /{library}/{options}/{hash}
+          method: get
+          request:
+            parameters:
+              paths:
+                library: true
+                options: true
+                hash: true
+
+package:
+  patterns:
+    - '!node_modules/express/**'
+    - '!node_modules/serverless/**'
+    - '!export-server/**'
+    - '!package.json'
+    - '!package-lock.json'

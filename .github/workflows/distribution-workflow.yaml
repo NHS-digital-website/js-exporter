@@ -1,0 +1,76 @@
+name: Distribution Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  #
+  # Deploy Lambda Service
+  #
+  deploy_lambda:
+    name: "Deploy Lambda Service"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      #
+      # Step 1
+      # Checkout the project's sourcecode
+      #
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      #
+      # Step 2
+      # Set Node.js version
+      #
+      - name: Request Node Version
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.17.6'
+
+      #
+      # Step 3
+      # Cache Management (CDN Distribution)
+      #
+      - name: Get cache key helper values
+        uses: actions/github-script@v3
+        id: cache-key-helper
+        with:
+          result-encoding: string
+          script: |
+            return JSON.stringify({
+              "year" : new Date().getFullYear(),
+              "rotation" : new Date().getTimezoneOffset()
+            })
+      - name: Setup cache (Node.js packages)
+        uses: actions/cache@v2
+        env:
+          YEAR: ${{ fromJSON(steps.cache-key-helper.outputs.result).year }}
+          ROTATION: ${{ fromJSON(steps.cache-key-helper.outputs.result).rotation }}
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-nhsd-js-exporter-distribution-${{ env.YEAR }}-${{ env.ROTATION }}
+          restore-keys: |
+            ${{ runner.os }}-nhsd-js-exporter-distribution-${{ env.YEAR }}-
+            ${{ runner.os }}-nhsd-js-exporter-distribution-
+
+      #
+      # Step 4
+      #
+      - name: Initialise NPM
+        run: npm i
+
+      #
+      # Step 6
+      #
+      - name: Serverless AWS authentication
+        run: npx serverless config credentials --provider aws --key ${{ secrets.NHSD_VIZ_AWS_KEY_ID }} --secret ${{ secrets.NHSD_VIZ_AWS_SECRET }}
+
+      #
+      # Step 7
+      #
+      - name: Serverless deploy
+        run: npx serverless deploy --stage production

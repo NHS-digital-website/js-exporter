@@ -1,0 +1,21 @@
+{
+  "name": "js-exporter",
+  "version": "1.0.0",
+  "description": "Export JavaScript library visualisations",
+  "scripts": {
+    "start": "set port=3001 && node export-server/server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "express": "^4.17.3",
+    "lodash.merge": "^4.6.2",
+    "playwright-aws-lambda": "^0.7.0",
+    "playwright-core": "^1.20.2"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.1154.0",
+    "serverless": "^3.12.0"
+  }
+}
