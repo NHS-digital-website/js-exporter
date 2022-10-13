@@ -1,5 +1,5 @@
 const path = require('path');
-const merge = require('lodash.merge');
+const assign = require('lodash.assign');
 const playwright = require('playwright-aws-lambda');
 const libraries = require('./libraries');
 
@@ -37,7 +37,7 @@ async function exportViz(options = {}, library = 'nhsd-dataviz') {
   }
 
   if (libraryConfig.baseOptions) {
-    options = merge(libraryConfig.baseOptions, options);
+    options = assign(libraryConfig.baseOptions, options);
   }
 
   await page.evaluate(libraryConfig.initScript, [options]);
