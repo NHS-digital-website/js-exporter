@@ -1,5 +1,6 @@
 const path = require('path');
-const assign = require('lodash.assign');
+const merge = require('lodash.merge');
+const cloneDeep = require('lodash.clonedeep')
 const playwright = require('playwright-aws-lambda');
 const libraries = require('./libraries');
 
@@ -36,11 +37,13 @@ async function exportViz(options = {}, library = 'nhsd-dataviz') {
     await page.addStyleTag({ url: libraryConfig.stylesheet });
   }
 
+  let chartOptions = options;
   if (libraryConfig.baseOptions) {
-    options = assign(libraryConfig.baseOptions, options);
+    chartOptions = cloneDeep(libraryConfig.baseOptions);
+    merge(chartOptions, options);
   }
 
-  await page.evaluate(libraryConfig.initScript, [options]);
+  await page.evaluate(libraryConfig.initScript, [chartOptions]);
 
   let output = {};
   let buffer;
